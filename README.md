@@ -106,10 +106,6 @@ rustup target add wasm32-wasip1
    sdf run --ui --ephemeral -e API_BASE_URL=REPLACE_WITH_YOUR_SERVER_URL
    ```
 
-### **Demo**
-- **Fetching and Refining News Content**:
-  - Access the client at `https://localhost:5173`, sign in, and search for news around the world. Watch the demo video below for more information.
-  - **[Link to Demo Video]**: [https://youtu.be/aCNeAj_-5MY]
 
 
 ## **Features**
