@@ -1,0 +1,124 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card > input {
+  margin: 1em;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  height: 3em;
+  width: 100%;
+  font-size: large;
+}
+
+.error {
+  color: red;
+  font-size: 0.8em;
+  margin: 0.5em 0;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.news-flow {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 100vh;
+}
+.nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 3em;
+}
+
+.news-flow > .nav-top > h2 {
+  font-size: 1em;
+  margin: 0.5em 0;
+  padding: -0.5em;
+  border-radius: 0.5em;
+  height: 1em;
+  text-align: center;
+}
+
+section {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  scroll-snap-align: center;
+  perspective: 500px;
+  cursor: pointer;
+}
+
+section > div {
+  width: 300px;
+  height: 400px;
+  position: relative;
+  max-height: 80vh;
+  margin: 35px;
+  background: #1a1a1a;
+  overflow: auto;
+  scrollbar-width: none;
+  padding: 1em;
+}
+
+section > div > img {
+  width: 100%;
+  height: 40%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: #646cff;
+  bottom: 20px;
+}
+
+.nav-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  z-index: 1;
+}

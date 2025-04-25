@@ -1,0 +1,115 @@
+apiVersion: 0.5.0
+meta:
+  name: ai-news-refiner
+  version: 0.1.0
+  namespace: data-pipeline
+
+config:
+  converter: raw
+
+topics:
+  raw-news-data:
+    schema:
+      value:
+        type: string
+        converter: raw
+
+  ai-refined-news:
+    schema:
+      value:
+        type: string
+        converter: raw
+
+services:
+  refine-news:
+    sources:
+      - type: topic
+        id: raw-news-data
+
+    transforms:
+      - operator: filter-map
+        dependencies:
+          - name: sdf-http
+            git: "https://github.com/infinyon/sdf-http-guest"
+            tag: "v0.4.0"
+          - name: serde_json
+            version: "1"
+        run: |
+          fn refine_news(raw_news_data: String) -> Result<Option<String>, Box<dyn std::error::Error>> {
+            // Deserialize the raw news data into a JSON value
+            let raw_json: serde_json::Value = serde_json::from_str(&raw_news_data)?;
+            println!("request: {}", raw_json);
+
+            // Extract the required fields
+            let user_id = raw_json.get("user_id").ok_or("Missing user_id")?.as_str().ok_or("Invalid user_id format")?;
+            let prompt = raw_json.get("prompt").ok_or("Missing prompt")?.as_str().ok_or("Invalid prompt format")?;
+            let description = raw_json.get("article")
+                .and_then(|a| a.get("description"))
+                .ok_or("Missing description")?.as_str().ok_or("Invalid description format")?;
+            let content = raw_json.get("article")
+                .and_then(|a| a.get("content"))
+                .ok_or("Missing content")?.as_str().ok_or("Invalid content format")?;
+            let url = raw_json.get("article")
+                .and_then(|a| a.get("url")).ok_or("Missing url")?.as_str().ok_or("Invalid url format")?;
+            let image = raw_json.get("article")
+                .and_then(|a| a.get("url_to_image")).ok_or("Missing image")?.as_str().ok_or("Invalid image format")?;
+
+            // Build the refined JSON data
+            let refined_data = serde_json::json!({
+                "prompt": prompt,
+                "description": description,
+                "content": content,
+            });
+
+            // Convert refined data to a JSON string
+            let body = serde_json::to_string(&refined_data)?;
+            println!("request body: {}", body);
+
+            // Build the request
+            let base_url = std::env::var("API_BASE_URL")?;
+            let request_url = format!("{}/refine", base_url);
+            let request = sdf_http::http::Request::builder()
+                .uri(request_url)
+                .method("POST")
+                .header("Content-Type", "application/json")
+                .body(body)?;
+
+            // Handle the response
+            let response = sdf_http::blocking::send(request)?;
+            let body_bytes: Vec<u8> = response.into_body();
+            let body_string = String::from_utf8(body_bytes)?;
+            println!("output: {}", body_string);
+
+            if body_string == "Internal Server Error" {
+                return Ok(None);
+            }
+
+            // Extract and check the 'relevant' field
+            let relevant: Option<bool> = serde_json::from_str(&body_string).ok()
+                .and_then(|json: serde_json::Value| json.get("relevant").and_then(|r| r.as_bool()));
+
+            // Print the 'relevant' field
+            println!("relevant: {:?}", relevant);
+
+            // Create the result object and convert it to a JSON string
+            let result = serde_json::json!({
+                "news": body_string,
+                "user_id": user_id,
+                "prompt": prompt,
+                "url": url,
+                "image": image
+            });
+
+            if relevant != Some(false) {
+                // Serialize the result to a JSON string and return
+                let result_string = serde_json::to_string(&result)?;
+                Ok(Some(result_string))
+            } else {
+                println!("relevant: {:?}", relevant);
+                Ok(None)
+            }
+          }
+
+    sinks:
+      - type: topic
+        id: ai-refined-news

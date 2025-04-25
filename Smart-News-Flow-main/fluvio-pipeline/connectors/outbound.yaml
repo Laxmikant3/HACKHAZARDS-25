@@ -1,0 +1,17 @@
+apiVersion: 0.1.0
+meta:
+  version: 0.2.10
+  name: sink-data
+  type: http-sink
+  topic: ai-refined-news
+  secrets:
+    - name: SINK_DATA_URL
+  consumer:
+    id: my-http-sink
+    offset:
+      strategy: auto
+http:
+  endpoint: "${{ secrets.SINK_DATA_URL }}"
+  interval: 5s
+  headers:
+    - "Content-Type: application/json"

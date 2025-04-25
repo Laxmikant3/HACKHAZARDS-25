@@ -1,0 +1,13 @@
+apiVersion: 0.1.0
+meta:
+  version: 0.3.8
+  name: raw-news-data
+  type: http-source
+  topic: raw-news-data
+  secrets:
+    - name: DATA_URL
+http:
+  endpoint: "${{ secrets.DATA_URL }}"
+  method: GET
+  stream: true
+  delimiter: "\n\n"
